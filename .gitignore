@@ -41,6 +41,9 @@ backend/prisma/migrations/
 # Storage
 storage/
 
+# Redis
+dump.rdb
+
 # Misc
 *.tgz
 .cache/
