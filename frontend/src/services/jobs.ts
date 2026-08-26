@@ -96,11 +96,9 @@ export async function retryJob(jobId: string): Promise<ApiResponse<{ jobId: stri
 }
 
 export function getItemDownloadUrl(itemId: string): string {
-  const base = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-  return `${base}/api/items/${itemId}/download`;
+  return `/api/items/${itemId}/download`;
 }
 
 export function getJobDownloadZipUrl(jobId: string): string {
-  const base = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-  return `${base}/api/jobs/${jobId}/download.zip`;
+  return `/api/jobs/${jobId}/download.zip`;
 }

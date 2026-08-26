@@ -34,7 +34,7 @@ export function useJobEvents({ jobId, onEvent }: UseJobEventsOptions) {
   useEffect(() => {
     if (!jobId) return;
 
-    const url = `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/jobs/${jobId}/events`;
+    const url = `/api/jobs/${jobId}/events`;
 
     const eventSource = new EventSource(url);
     eventSourceRef.current = eventSource;
