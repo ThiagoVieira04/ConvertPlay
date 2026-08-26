@@ -1,0 +1,115 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: convertflow-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: convertflow
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - internal
+
+  redis:
+    image: redis:7-alpine
+    container_name: convertflow-redis
+    restart: unless-stopped
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - internal
+
+  api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.api
+    container_name: convertflow-api
+    restart: unless-stopped
+    ports:
+      - '3001:3001'
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      HOST: 0.0.0.0
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/convertflow?schema=public
+      REDIS_URL: redis://redis:6379
+      CORS_ORIGIN: http://localhost
+      RATE_LIMIT_MAX: 30
+      RATE_LIMIT_WINDOW_MS: 60000
+      REQUEST_TIMEOUT_MS: 30000
+      MAX_URL_LENGTH: 2048
+      MAX_ITEMS_PER_JOB: 50
+      JOB_TTL_HOURS: 72
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - internal
+
+  worker:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.worker
+    container_name: convertflow-worker
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/convertflow?schema=public
+      REDIS_URL: redis://redis:6379
+      MAX_CONCURRENT_JOBS: 2
+      JOB_LOCK_DURATION: 60000
+      JOB_STALLED_INTERVAL: 30000
+      FFMPEG_PATH: ffmpeg
+      FFMPEG_TIMEOUT_MS: 300000
+      STORAGE_DIR: /app/storage/output
+      MAX_FILE_SIZE_MB: 500
+      JOB_TTL_HOURS: 72
+      TEMP_FILE_TTL_HOURS: 48
+    volumes:
+      - storage_data:/app/storage
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - internal
+
+  frontend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.frontend
+    container_name: convertflow-frontend
+    restart: unless-stopped
+    ports:
+      - '80:80'
+    depends_on:
+      - api
+    networks:
+      - internal
+
+volumes:
+  postgres_data:
+  redis_data:
+  storage_data:
+
+networks:
+  internal:
+    driver: bridge
