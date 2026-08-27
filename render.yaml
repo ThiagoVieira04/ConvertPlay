@@ -1,17 +1,4 @@
 services:
-  # PostgreSQL Database
-  - type: postgresql
-    name: convertflow-db
-    plan: free
-    databaseName: convertflow
-    user: convertflow
-
-  # Redis
-  - type: redis
-    name: convertflow-redis
-    plan: free
-    ipAllowList: []
-
   # Backend API
   - type: web
     name: convertflow-api
@@ -28,14 +15,9 @@ services:
       - key: HOST
         value: 0.0.0.0
       - key: DATABASE_URL
-        fromDatabase:
-          name: convertflow-db
-          property: connectionString
+        sync: false
       - key: REDIS_URL
-        fromService:
-          name: convertflow-redis
-          type: redis
-          property: connectionString
+        sync: false
       - key: CORS_ORIGIN
         value: https://convert-play-frontend.vercel.app
       - key: RATE_LIMIT_MAX
@@ -65,14 +47,9 @@ services:
       - key: NODE_ENV
         value: production
       - key: DATABASE_URL
-        fromDatabase:
-          name: convertflow-db
-          property: connectionString
+        sync: false
       - key: REDIS_URL
-        fromService:
-          name: convertflow-redis
-          type: redis
-          property: connectionString
+        sync: false
       - key: MAX_CONCURRENT_JOBS
         value: 2
       - key: FFMPEG_PATH
