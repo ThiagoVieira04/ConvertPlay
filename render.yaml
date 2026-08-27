@@ -2,11 +2,10 @@ services:
   # Backend API
   - type: web
     name: convertflow-api
-    runtime: image
-    image:
-      url: https://github.com/ThiagoVieira04/ConvertPlay.git
-      branch: main
-      dockerfilePath: docker/Dockerfile.api
+    runtime: docker
+    dockerfilePath: docker/Dockerfile.api
+    dockerContext: .
+    branch: main
     envVars:
       - key: NODE_ENV
         value: production
@@ -38,11 +37,10 @@ services:
   # Worker (BullMQ + FFmpeg)
   - type: worker
     name: convertflow-worker
-    runtime: image
-    image:
-      url: https://github.com/ThiagoVieira04/ConvertPlay.git
-      branch: main
-      dockerfilePath: docker/Dockerfile.worker
+    runtime: docker
+    dockerfilePath: docker/Dockerfile.worker
+    dockerContext: .
+    branch: main
     envVars:
       - key: NODE_ENV
         value: production
