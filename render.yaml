@@ -1,6 +1,6 @@
 services:
   # PostgreSQL Database
-  - type: pgsql
+  - type: postgresql
     name: convertflow-db
     plan: free
     databaseName: convertflow
