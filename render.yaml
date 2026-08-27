@@ -31,6 +31,7 @@ services:
         value: 50
       - key: JOB_TTL_HOURS
         value: 72
+    preDeployCommand: npx prisma migrate deploy
     healthCheckPath: /api/health/live
     autoDeploy: true
 
